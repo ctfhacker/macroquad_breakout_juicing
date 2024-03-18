@@ -18,20 +18,21 @@ pkgs.mkShell rec {
     pkgs.pkg-config
   ];
 
-  buildInputs = [ 
-    pkgs.rust-bin.nightly.latest.default
-    pkgs.rust-analyzer
-    pkgs.pkg-config
+  buildInputs = with pkgs; [ 
+    rust-bin.nightly.latest.default
+    rust-analyzer
+    pkg-config
 
-    pkgs.libGL
-    pkgs.udev
-    pkgs.alsa-lib
-    pkgs.vulkan-loader
-    pkgs.libxkbcommon
-    pkgs.xorg.libX11
-    pkgs.xorg.libXcursor
-    pkgs.xorg.libXi
-    pkgs.xorg.libXrandr
+    # x11 game related pkgs
+    libGL
+    udev
+    alsa-lib
+    vulkan-loader
+    libxkbcommon
+    xorg.libX11
+    xorg.libXcursor
+    xorg.libXi
+    xorg.libXrandr
   ];
 
   LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath buildInputs;
