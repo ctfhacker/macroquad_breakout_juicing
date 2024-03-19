@@ -8,7 +8,7 @@ pub enum Shape {
     Rectangle { width: f32, height: f32 },
 }
 
-#[derive(Default)]
+#[derive(Default, Debug, Clone)]
 pub struct World {
     /// Positions of all objects in the world
     positions: Vec<Vec2>,
@@ -47,6 +47,7 @@ pub struct Object {
     pub shape: Shape,
 }
 
+#[derive(Debug, Clone)]
 pub struct ObjectIndex(usize);
 
 impl World {

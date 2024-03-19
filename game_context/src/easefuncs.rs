@@ -1,6 +1,6 @@
 //! Various easing functions
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Clone)]
 pub enum EaseFunc {
     #[default]
     Linear,

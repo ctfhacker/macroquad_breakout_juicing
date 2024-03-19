@@ -43,7 +43,7 @@ fn reset_state(state: &mut Option<State>) {
         reset_initialized: false,
         blocks: [[true; BLOCKS_WIDTH]; BLOCKS_HEIGHT],
         ball: Vec2::new(12., 7.),
-        ball_velocity: Vec2::new(3.5, -3.5),
+        ball_velocity: Vec2::new(6.0, -6.5),
         platform,
         stick: false,
         platform_width: 5.,
@@ -89,7 +89,7 @@ pub extern "C" fn game_update_and_render(
     };
 
     // Q - reset the world
-    if is_key_down(KeyCode::Q) {
+    if game.buttons.contains(&KeyCode::Q) {
         *state = None;
         return;
     }
@@ -115,12 +115,14 @@ pub extern "C" fn game_update_and_render(
     let platform_pos = world.position(&platform);
 
     // Right - Move paddle right
-    if is_key_down(KeyCode::Right) && platform_pos.x < SCREEN_WIDTH - *platform_width / 2. {
+    if game.buttons.contains(&KeyCode::Right)
+        && platform_pos.x < SCREEN_WIDTH - *platform_width / 2.
+    {
         world.position_mut(&platform).x += 6.0 * delta;
     }
 
     // Left - Move paddle right
-    if is_key_down(KeyCode::Left) && platform_pos.x > *platform_width / 2. {
+    if game.buttons.contains(&KeyCode::Left) && platform_pos.x > *platform_width / 2. {
         let new_x = (platform_pos.x - 6.0 * delta).max(0.0);
         world.position_mut(&platform).x = new_x;
     }
@@ -149,20 +151,22 @@ pub extern "C" fn game_update_and_render(
         ball.x = platform_x;
         ball.y = SCREEN_HEIGHT - 0.5;
 
-        *stick = !is_key_down(KeyCode::Space);
+        *stick = !game.buttons.contains(&KeyCode::Space);
     }
 
     // Bounce the ball off the left/right walls
     if ball.x <= 0. || ball.x > SCREEN_WIDTH {
-        // Increase/decrease speed of ball
+        // dbg!(&ball_velocity);
+
+        // Increase/decrease speed of ball on collision
         ball_velocity.x *= 1.0;
 
-        if ball_velocity.x >= 30.0 {
-            ball_velocity.x = 3.0;
+        if ball_velocity.x >= 20.0 {
+            ball_velocity.x = 5.0;
         }
 
-        if ball_velocity.x <= -30.0 {
-            ball_velocity.x = -3.0;
+        if ball_velocity.x <= -20.0 {
+            ball_velocity.x = -5.0;
         }
 
         ball_velocity.x *= -1.;

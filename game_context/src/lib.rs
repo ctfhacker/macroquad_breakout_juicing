@@ -27,7 +27,10 @@ pub struct GameContext<'a> {
     /// Reference to the memory backing the game
     pub memory: &'a mut Memory,
 
-    ///
+    /// The current buttons pressed
+    pub buttons: &'a [KeyCode],
+
+    /// The time (in seconds) per frame for the game
     pub frame_time: f32,
 }
 
@@ -37,6 +40,7 @@ pub const SCREEN_WIDTH: f32 = 20.0;
 pub const SCREEN_HEIGHT: f32 = 20.0;
 
 // The game state data. This data is initialized in the game code itself.
+#[derive(Debug, Clone)]
 pub struct State {
     pub reset_initialized: bool,
     pub blocks: [[bool; BLOCKS_WIDTH]; BLOCKS_HEIGHT],
