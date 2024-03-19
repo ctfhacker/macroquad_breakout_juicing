@@ -1,10 +1,6 @@
 //! Collection of all objects in the world
 
-use crate::prelude::*;
-
-use macroquad::prelude::*;
-
-use std::time::Duration;
+use crate::*;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Shape {
@@ -95,10 +91,7 @@ impl World {
         index
     }
 
-    pub fn update(&mut self) {
-        // TODO(corydu): Could this value be in the [`World`] struct itself?
-        let frame_time = get_frame_time();
-
+    pub fn update(&mut self, frame_time: f32) {
         for index in 0..self.positions.len() {
             // Only updating the animating objects
             if !self.animating[index] {
@@ -126,7 +119,7 @@ impl World {
     }
 
     // Draw the current world state!
-    pub fn draw(&self) {
+    pub fn draw(&self, macroquad: &Macroquad) {
         for index in 0..self.positions.len() {
             let shape = &self.shapes[index];
             let position = &self.positions[index];
@@ -134,10 +127,10 @@ impl World {
 
             match shape {
                 Shape::Rectangle { width, height } => {
-                    draw_rectangle(position.x, position.y, *width, *height, color);
+                    (macroquad.draw_rectangle)(position.x, position.y, *width, *height, color);
                 }
                 Shape::Circle { radius } => {
-                    draw_circle(position.x, position.y, *radius, RED);
+                    (macroquad.draw_circle)(position.x, position.y, *radius, RED);
                 }
             }
         }
