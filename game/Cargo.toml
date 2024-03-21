@@ -6,5 +6,5 @@ edition = "2021"
 [dependencies]
 game_context = { path = "../game_context" }
 
-[target.'cfg(target_os = "linux")'.lib]
-crate-type = ["cdylib"]
+[lib]
+crate-type = ["cdylib", "rlib"]

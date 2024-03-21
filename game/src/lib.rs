@@ -83,7 +83,7 @@ fn reset_state(state: &mut Option<State>, macroquad: &Macroquad) {
             let millis = 800;
 
             let ease = EaseFunc::ElasticStop {
-                elastic: (macroquad.gen_range)(1.0, 5.0),
+                elastic: (macroquad.gen_range)(2.0, 4.0),
             };
 
             // Initially animate the block to fall from the top of the screen
