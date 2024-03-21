@@ -1,10 +1,11 @@
+#![feature(stmt_expr_attributes)]
+
 use std::io::Write;
 use std::mem::size_of;
 
 use game_context::*;
 use macroquad::prelude::*;
 
-#[cfg(target_os = "linux")]
 mod dl;
 
 fn setup_camera() {
@@ -98,6 +99,7 @@ async fn main() {
         game_code = game_code.reload();
         game_update_and_render = &game_code.game_update_and_render;
 
+        #[cfg(target_os = "linux")]
         if is_key_released(KeyCode::L) {
             match loop_state {
                 LoopState::Normal => {
@@ -125,6 +127,7 @@ async fn main() {
 
         buttons = get_keys_down().iter().cloned().collect();
 
+        #[cfg(target_os = "linux")]
         match loop_state {
             LoopState::Play => {
                 if loop_data.next_index % 30 == 0 {

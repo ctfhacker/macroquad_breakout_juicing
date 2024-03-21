@@ -56,8 +56,8 @@ pub fn allocate_memory() -> *mut u8 {
     res
 }
 
-#[cfg(not(target_os = "linux"))]
-compile_error!("Memory allocation not written for this operating system");
+// #[cfg(not(target_os = "linux"))]
+// compile_error!("Memory allocation not written for this operating system");
 
 /// Memory chunk allocated for the game with a basic bump allocator
 pub struct Memory {
@@ -112,6 +112,15 @@ impl Memory {
         allocate_memory();
 
         //
+        Self {
+            initialized: false,
+            next_allocation: 0,
+        }
+    }
+
+    /// Allocate a new chunk of memory
+    #[cfg(target_family = "wasm")]
+    pub fn new() -> Self {
         Self {
             initialized: false,
             next_allocation: 0,

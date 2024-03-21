@@ -4,5 +4,5 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+# macroquad = { git = "https://github.com/not-fl3/macroquad", branch = "master" }
 macroquad = "0.4.5"
-# macroquad = { path = "../../macroquad" }

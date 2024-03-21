@@ -20,7 +20,7 @@ pub struct World {
     colors: Vec<Color>,
 
     /// Is the current object being animated
-    animating: Vec<bool>,
+    pub animating: Vec<bool>,
 
     /// The total time of this animation
     animation_duration: Vec<f32>,
@@ -85,7 +85,7 @@ impl World {
         animation_position_start.push(Default::default());
         animation_position_target.push(Default::default());
         animation_color_target.push(Default::default());
-        animation_position_ease.push(Default::default());
+        animation_position_ease.push(EaseFunc::Linear);
 
         assert!(positions.len() == shapes.len() && positions.len() == colors.len());
 
@@ -99,10 +99,13 @@ impl World {
                 continue;
             }
 
+            // Get the current progress of this animation
             let progress = self.animation_elapsed[index] / self.animation_duration[index];
 
+            // Apply easing function
             let progress = self.animation_position_ease[index].calculate(progress);
 
+            // Calculate the new position of this object based on the progress
             let target = self.animation_position_target[index];
             let start = self.animation_position_start[index];
             let new_pos = start + (target - start) * progress;

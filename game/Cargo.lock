@@ -151,8 +151,7 @@ checksum = "9c198f91728a82281a64e1f4f9eeb25d82cb32a5de251c6bd1b5154d63a8e7bd"
 [[package]]
 name = "macroquad"
 version = "0.4.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "002647f9301eb8827145a6ae71f1fc0b0441d3a3e0648146e3c7de926e78c37d"
+source = "git+https://github.com/not-fl3/macroquad?branch=master#90f433514895974696cb68c4d34f485090641b27"
 dependencies = [
  "bumpalo",
  "fontdue",
@@ -167,8 +166,7 @@ dependencies = [
 [[package]]
 name = "macroquad_macro"
 version = "0.1.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f5cecfede1e530599c8686f7f2d609489101d3d63741a6dc423afc997ce3fcc8"
+source = "git+https://github.com/not-fl3/macroquad?branch=master#90f433514895974696cb68c4d34f485090641b27"
 
 [[package]]
 name = "malloc_buf"

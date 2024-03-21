@@ -8,6 +8,7 @@ use std::time::SystemTime;
 use game_context::{GameContext, Macroquad, State};
 
 #[link(name = "dl")]
+#[cfg(target_os = "linux")]
 extern "C" {
     pub(crate) fn dlopen(filename: *const c_char, flags: u32) -> Handle;
     pub(crate) fn dlclose(handle: Handle);
@@ -37,33 +38,41 @@ pub struct GameFuncs {
 
     /// The creation time of the currently loaded library used to check if we should
     /// reload
-    pub created_time: SystemTime,
+    pub created_time: Option<SystemTime>,
 }
 
 impl GameFuncs {
     /// Drop the old game library and reload the new one
     pub fn reload(self) -> Self {
-        // If the library hasn't been updated, no need to reload it
-        if !self.is_library_updated() {
-            return self;
+        #[cfg(target_family = "wasm")]
+        return self;
+
+        #[cfg(target_os = "linux")]
+        {
+            // If the library hasn't been updated, no need to reload it
+            if !self.is_library_updated() {
+                return self;
+            }
+
+            // Drop the old library handle
+            drop(self);
+
+            // Reload the new game handle
+            get_game_funcs()
         }
-
-        // Drop the old library handle
-        drop(self);
-
-        // Reload the new game handle
-        get_game_funcs()
     }
 
     /// Returns true if the library has been modified
+    #[cfg(target_os = "linux")]
     pub fn is_library_updated(&self) -> bool {
-        get_library_creation_time() != self.created_time
+        get_library_creation_time() != self.created_time.unwrap()
     }
 }
 
 impl Drop for GameFuncs {
     fn drop(&mut self) {
         unsafe {
+            #[cfg(target_os = "linux")]
             dlclose(self.handle);
         }
     }
@@ -90,6 +99,7 @@ impl<T> std::ops::Deref for Symbol<T> {
 }
 
 /// Get the requested [`Symbol`] by export name using the given library handle
+#[cfg(target_os = "linux")]
 pub fn get_symbol<T>(library: Handle, symbol_name: &str) -> Result<Symbol<T>, CString> {
     // Get the `game_update_and_render` func from the game library
     unsafe {
@@ -114,6 +124,7 @@ pub fn get_symbol<T>(library: Handle, symbol_name: &str) -> Result<Symbol<T>, CS
 /// Location of the copied game logic library used to enable hot reload
 const TMP_FILE: &str = "/tmp/.libgame.so";
 
+#[cfg(target_os = "linux")]
 fn get_library_creation_time() -> SystemTime {
     for _ in 0..100 {
         let Ok(metadata) = std::fs::metadata(LIBGAME) else {
@@ -130,30 +141,59 @@ fn get_library_creation_time() -> SystemTime {
     panic!("Failed to get library creation time");
 }
 
+/*
+#[cfg(target_family = "wasm")]
+pub fn get_game_funcs() -> GameFuncs {
+    GameFuncs {
+        handle: Handle(0),
+        game_update_and_render: Symbol {
+            handle: game::game_update_and_render as *mut c_,
+            phantom: PhantomData,
+        },
+        created_time: SystemTime::now(),
+    }
+}
+*/
+
 /// Load and return the function pointers from the game code
 pub fn get_game_funcs() -> GameFuncs {
-    // Copy the current game library into a temp file for hot reload. Ignore the failure
-    // copy case and pick up the game logic on the next frame
-    let _discard = std::fs::copy(LIBGAME, TMP_FILE);
+    #[cfg(target_family = "wasm")]
+    {
+        return GameFuncs {
+            handle: Handle(0),
+            game_update_and_render: Symbol {
+                handle: game::game_update_and_render as *mut _,
+                phantom: PhantomData,
+            },
+            created_time: None,
+        };
+    }
 
-    let created_time = get_library_creation_time();
+    #[cfg(not(target_family = "wasm"))]
+    {
+        // Copy the current game library into a temp file for hot reload. Ignore the failure
+        // copy case and pick up the game logic on the next frame
+        let _discard = std::fs::copy(LIBGAME, TMP_FILE);
 
-    // Get the temporary library file
-    let library = CString::new(TMP_FILE).expect("CString failed for tmp library");
+        let created_time = get_library_creation_time();
 
-    unsafe {
-        // Open the  current game dynamic library
-        let handle = dlopen(library.as_ptr(), RTLD_LAZY);
-        assert!(handle.0 != 0, "libgame.so not found");
+        // Get the temporary library file
+        let library = CString::new(TMP_FILE).expect("CString failed for tmp library");
 
-        // Get the `game_update_and_render` export
-        let game_update_and_render = get_symbol(handle, "game_update_and_render").unwrap();
+        unsafe {
+            // Open the  current game dynamic library
+            let handle = dlopen(library.as_ptr(), RTLD_LAZY);
+            assert!(handle.0 != 0, "libgame.so not found");
 
-        // Return the exported game functions
-        GameFuncs {
-            handle,
-            game_update_and_render,
-            created_time,
+            // Get the `game_update_and_render` export
+            let game_update_and_render = get_symbol(handle, "game_update_and_render").unwrap();
+
+            // Return the exported game functions
+            GameFuncs {
+                handle,
+                game_update_and_render,
+                created_time: Some(created_time),
+            }
         }
     }
 }

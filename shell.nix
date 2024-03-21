@@ -9,7 +9,13 @@ let
     sha256 = "sha256-/DZsoPH5GBzOpVEGz5PgJ7vh8Q6TcrJq5u8FcBjqAfI=";
   });
 
+
   pkgs = orig_pkgs.extend rust-overlay;
+
+  rust = pkgs.rust-bin.nightly.latest.default.override {
+    extensions = [ "rust-src" ];
+    targets = [ "wasm32-unknown-unknown" ];
+  };
 
 in 
 
@@ -19,7 +25,8 @@ pkgs.mkShell rec {
   ];
 
   buildInputs = with pkgs; [ 
-    rust-bin.nightly.latest.default
+    rust
+
     rust-analyzer
     pkg-config
 
